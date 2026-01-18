@@ -166,7 +166,7 @@ export default function Page() {
           map[iso] = { ...d, iso3: iso, name: NAME_OVERRIDES[iso] ?? d.name };
         }
         setDetails(map);
-        const feats = j.geo?.features || [];
+        const feats = (j.geo?.features as GeoFeature[] | undefined) || [];
         setCountries(feats);
         const nameMap: Record<string, string> = {};
         for (const f of feats) {

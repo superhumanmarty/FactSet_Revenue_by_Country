@@ -1,3 +1,5 @@
+import type { Geometry } from "geojson";
+
 export type ApiPayload = {
   iso3ToIntensity: Record<string, number>;
   countryDetails: Array<{
@@ -15,7 +17,10 @@ export type ApiPayload = {
   }>;
   geo: {
     features?: Array<{
+      type: string;
+      geometry: Geometry;
       properties?: Record<string, unknown>;
+      bbox?: number[];
     }>;
   };
   totalRevenueMillions: number;
