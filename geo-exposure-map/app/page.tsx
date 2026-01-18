@@ -346,7 +346,13 @@ export default function Page() {
           <div className="mt-6 flex justify-center">
             <div
               className="w-full max-w-3xl rounded-lg px-4 py-5 text-xs"
-              style={{ background: PANEL, border: `1px solid ${BORDER}`, minHeight: 180 }}
+              style={{
+                background: PANEL,
+                border: `1px solid ${BORDER}`,
+                minHeight: 220,
+                maxHeight: 220,
+                overflow: "hidden",
+              }}
             >
               <div className="flex items-center gap-2 text-sky-100">
                 <span>Revenue share</span>
