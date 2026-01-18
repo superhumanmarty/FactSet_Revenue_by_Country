@@ -318,14 +318,7 @@ export default function Page() {
                 style={{ width: `${Math.min(100, loadProgress)}%` }}
               />
             </div>
-            <div className="mt-4 flex items-center gap-3 text-xs text-sky-200/80">
-              <img
-                src="/cute_dog.png"
-                alt="Loading"
-                className="h-10 w-10 rounded-md object-cover ring-1 ring-[#1f2b38]"
-              />
-              <span>Hang tight while we get things ready.</span>
-            </div>
+            <div className="mt-4 text-xs text-sky-200/80">Hang tight while we get things ready.</div>
           </div>
         ) : (
           <div
