@@ -17,6 +17,8 @@ type CountryDetail = {
   share: number;
   population: number | null;
   flagUrl: string | null;
+   gdpCurrentUsd: number | null;
+   gdpYear: number | null;
 };
 
 const NAME_OVERRIDES: Record<string, string> = {
@@ -101,6 +103,10 @@ const fmtRev = (millions: number) => {
 };
 const fmtPopulation = (v: number | null) =>
   v == null ? "n/a" : new Intl.NumberFormat("en-US", { notation: "compact" }).format(v);
+const fmtCurrency = (v: number | null) =>
+  v == null
+    ? "n/a"
+    : new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 2 }).format(v);
 
 export default function Page() {
   const [countries, setCountries] = useState<GeoFeature[]>([]);
@@ -396,6 +402,10 @@ export default function Page() {
                   </div>
                   <div className="text-sky-200/70">
                     Population: {fmtPopulation(hoverDetail.population)}
+                  </div>
+                  <div className="text-sky-200/70">
+                    GDP (current US$): {fmtCurrency(hoverDetail.gdpCurrentUsd)}
+                    {hoverDetail.gdpYear ? ` · ${hoverDetail.gdpYear}` : ""}
                   </div>
                 </div>
               ) : (

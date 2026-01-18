@@ -14,6 +14,8 @@ export type ApiPayload = {
     office: boolean;
     hub: boolean;
     nearZero: boolean;
+    gdpCurrentUsd: number | null;
+    gdpYear: number | null;
   }>;
   geo: {
     features?: Array<{
@@ -326,6 +328,8 @@ export async function buildExposureData(): Promise<ApiPayload> {
     office: boolean;
     hub: boolean;
     nearZero: boolean;
+    gdpCurrentUsd: number | null;
+    gdpYear: number | null;
   }> = {};
 
   for (const row of allocations) {
@@ -334,6 +338,7 @@ export async function buildExposureData(): Promise<ApiPayload> {
     const alpha2 =
       meta?.alpha2 ?? iso3ToAlpha2[row.iso3] ?? (row.iso3.length >= 2 ? row.iso3.slice(0, 2) : null);
     const flagUrl = alpha2 ? `https://flagcdn.com/${alpha2.toLowerCase()}.svg` : null;
+    const gdpEntry = gdp.get(row.iso3);
     countryDetailsMap[row.iso3] = {
       iso3: row.iso3,
       name: row.country,
@@ -346,6 +351,8 @@ export async function buildExposureData(): Promise<ApiPayload> {
       office: row.office,
       hub: row.hub,
       nearZero: row.nearZero,
+      gdpCurrentUsd: gdpEntry?.value ?? null,
+      gdpYear: gdpEntry?.year ?? null,
     };
   }
 
@@ -355,6 +362,7 @@ export async function buildExposureData(): Promise<ApiPayload> {
     const alpha2 = c.alpha2 ?? iso3ToAlpha2[c.iso3] ?? (c.iso3.length >= 2 ? c.iso3.slice(0, 2) : null);
     const flagUrl = alpha2 ? `https://flagcdn.com/${alpha2.toLowerCase()}.svg` : null;
     const population = pop.get(c.iso3)?.value ?? null;
+    const gdpEntry = gdp.get(c.iso3);
     iso3ToIntensity[c.iso3] = iso3ToIntensity[c.iso3] ?? 0;
     countryDetailsMap[c.iso3] = {
       iso3: c.iso3,
@@ -368,6 +376,8 @@ export async function buildExposureData(): Promise<ApiPayload> {
       office: OFFICE_COUNTRIES.has(c.iso3),
       hub: HUB_MULT.has(c.iso3),
       nearZero: NEAR_ZERO.has(c.iso3),
+      gdpCurrentUsd: gdpEntry?.value ?? null,
+      gdpYear: gdpEntry?.year ?? null,
     };
   }
 
