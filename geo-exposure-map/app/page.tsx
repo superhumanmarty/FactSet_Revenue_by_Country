@@ -349,8 +349,8 @@ export default function Page() {
               style={{
                 background: PANEL,
                 border: `1px solid ${BORDER}`,
-                minHeight: 220,
-                maxHeight: 220,
+                minHeight: 320,
+                maxHeight: 320,
                 overflowY: "auto",
               }}
             >
