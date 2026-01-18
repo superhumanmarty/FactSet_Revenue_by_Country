@@ -121,6 +121,8 @@ export default function Page() {
   const [showFullMethod, setShowFullMethod] = useState<boolean>(false);
   const [search, setSearch] = useState<string>("");
   const [searchIso, setSearchIso] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [loadProgress, setLoadProgress] = useState<number>(8);
 
   const applySearch = (val: string) => {
     setSearch(val);
@@ -161,6 +163,10 @@ export default function Page() {
   useEffect(() => {
     async function load() {
       setError(null);
+      setIsLoading(true);
+      const timer = setInterval(() => {
+        setLoadProgress((p) => (p >= 95 ? 95 : p + 7));
+      }, 250);
       try {
         const j = await buildExposureData();
         const normIntensity: Record<string, number> = {};
@@ -185,9 +191,14 @@ export default function Page() {
         }
         setNames(nameMap);
         setMetaNote(j.meta?.note || "");
+        setLoadProgress(100);
       } catch (e) {
         console.error(e);
         setError("Failed to load data");
+        setLoadProgress(100);
+      } finally {
+        clearInterval(timer);
+        setIsLoading(false);
       }
     }
     load();
@@ -292,58 +303,78 @@ export default function Page() {
           </div>
         </div>
 
-        <div
-          className="mt-6 w-full max-w-3xl mx-auto rounded-xl p-4"
-          style={{ background: PANEL, border: `1px solid ${BORDER}` }}
-        >
-          <div className="relative max-w-3xl mx-auto">
-            <svg viewBox="0 0 820 450" className="w-full h-auto">
-              <rect x="0" y="0" width="820" height="450" fill="#050a10" />
-              <g>
-                {countryShapes.map(({ iso3, d }) => {
-                  const v = intensity[iso3] ?? 0;
-                  const fill = colorFor(v, maxShare);
-                  const isActive = hoverIso3 === iso3;
-                  return (
-                    <path
-                      key={iso3}
-                      d={d}
-                      fill={fill}
-                      stroke={isActive ? "#8ae1ff" : "#0f172a"}
-                      strokeWidth={isActive ? 1.4 : 0.6}
-                      opacity={isActive ? 1 : 0.9}
-                      style={{ transition: "fill 200ms ease, stroke 120ms ease, opacity 120ms ease, stroke-width 120ms ease" }}
-                      onMouseEnter={() => iso3 && iso3 !== hoverIso3 && setHoverIso3(iso3)}
-                      onMouseLeave={() => setHoverIso3(searchIso)}
-                    />
-                  );
-                })}
-              </g>
-              {/* Tiny overlays for small countries */}
-              <g>
-                {tinyShapes.map(({ iso3, cx, cy }) => {
-                  const v = intensity[iso3] ?? 0;
-                  const fill = colorFor(v, maxShare);
-                  const isActive = hoverIso3 === iso3;
-                  return (
-                    <circle
-                      key={`tiny-${iso3}`}
-                      cx={cx}
-                      cy={cy}
-                      r={isActive ? 7 : 6}
-                      fill={fill}
-                      stroke={isActive ? "#8ae1ff" : "#0f172a"}
-                      strokeWidth={isActive ? 0.8 : 0.4}
-                      opacity={isActive ? 1 : 0.85}
-                      style={{ cursor: "pointer", transition: "fill 120ms ease, opacity 120ms ease, stroke-width 120ms ease, r 120ms ease" }}
-                      onMouseEnter={() => iso3 && iso3 !== hoverIso3 && setHoverIso3(iso3)}
-                      onMouseLeave={() => setHoverIso3(searchIso)}
-                    />
-                  );
-                })}
-              </g>
-            </svg>
+        {isLoading ? (
+          <div
+            className="mt-6 w-full max-w-3xl mx-auto rounded-xl p-6"
+            style={{ background: PANEL, border: `1px solid ${BORDER}` }}
+          >
+            <div className="text-sm text-sky-100 flex items-center justify-between">
+              <span>Loading data…</span>
+              <span className="text-sky-300">{Math.min(100, loadProgress)}%</span>
+            </div>
+            <div className="mt-3 h-2 w-full rounded-full bg-[#0f1722] ring-1 ring-[#1f2b38] overflow-hidden">
+              <div
+                className="h-full rounded-full bg-sky-400 transition-all duration-200"
+                style={{ width: `${Math.min(100, loadProgress)}%` }}
+              />
+            </div>
+            <div className="mt-4 text-xs text-sky-200/80">
+              Fetching World Bank indicators and geo data…
+            </div>
           </div>
+        ) : (
+          <div
+            className="mt-6 w-full max-w-3xl mx-auto rounded-xl p-4"
+            style={{ background: PANEL, border: `1px solid ${BORDER}` }}
+          >
+            <div className="relative max-w-3xl mx-auto">
+              <svg viewBox="0 0 820 450" className="w-full h-auto">
+                <rect x="0" y="0" width="820" height="450" fill="#050a10" />
+                <g>
+                  {countryShapes.map(({ iso3, d }) => {
+                    const v = intensity[iso3] ?? 0;
+                    const fill = colorFor(v, maxShare);
+                    const isActive = hoverIso3 === iso3;
+                    return (
+                      <path
+                        key={iso3}
+                        d={d}
+                        fill={fill}
+                        stroke={isActive ? "#8ae1ff" : "#0f172a"}
+                        strokeWidth={isActive ? 1.4 : 0.6}
+                        opacity={isActive ? 1 : 0.9}
+                        style={{ transition: "fill 200ms ease, stroke 120ms ease, opacity 120ms ease, stroke-width 120ms ease" }}
+                        onMouseEnter={() => iso3 && iso3 !== hoverIso3 && setHoverIso3(iso3)}
+                        onMouseLeave={() => setHoverIso3(searchIso)}
+                      />
+                    );
+                  })}
+                </g>
+                {/* Tiny overlays for small countries */}
+                <g>
+                  {tinyShapes.map(({ iso3, cx, cy }) => {
+                    const v = intensity[iso3] ?? 0;
+                    const fill = colorFor(v, maxShare);
+                    const isActive = hoverIso3 === iso3;
+                    return (
+                      <circle
+                        key={`tiny-${iso3}`}
+                        cx={cx}
+                        cy={cy}
+                        r={isActive ? 7 : 6}
+                        fill={fill}
+                        stroke={isActive ? "#8ae1ff" : "#0f172a"}
+                        strokeWidth={isActive ? 0.8 : 0.4}
+                        opacity={isActive ? 1 : 0.85}
+                        style={{ cursor: "pointer", transition: "fill 120ms ease, opacity 120ms ease, stroke-width 120ms ease, r 120ms ease" }}
+                        onMouseEnter={() => iso3 && iso3 !== hoverIso3 && setHoverIso3(iso3)}
+                        onMouseLeave={() => setHoverIso3(searchIso)}
+                      />
+                    );
+                  })}
+                </g>
+              </svg>
+            </div>
 
           <div className="mt-6 flex justify-center">
             <div
@@ -408,7 +439,8 @@ export default function Page() {
               )}
             </div>
           </div>
-        </div>
+          </div>
+        )}
 
         <div className="mt-4 text-xs text-slate-400">
           <button
