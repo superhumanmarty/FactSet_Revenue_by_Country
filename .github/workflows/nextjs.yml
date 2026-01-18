@@ -54,6 +54,9 @@ jobs:
         with:
           node-version: "20"
           cache: ${{ steps.detect-package-manager.outputs.manager }}
+          cache-dependency-path: |
+            geo-exposure-map/package-lock.json
+            geo-exposure-map/yarn.lock
       - name: Setup Pages
         uses: actions/configure-pages@v5
         with:
