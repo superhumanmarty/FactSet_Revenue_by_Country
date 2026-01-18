@@ -263,16 +263,12 @@ export default function Page() {
           <div className="flex items-center gap-3 text-xs text-sky-100/80">
             <div className="flex flex-col items-end leading-tight text-right">
               <div className="font-semibold text-sky-50">Project by Marty Hendricks</div>
-              <div className="text-sky-100/80">Buy-Side Analytics Intern candidate</div>
               <div className="flex gap-3">
                 <a className="text-sky-300 hover:text-sky-100 underline underline-offset-4" href="https://www.linkedin.com/in/marty-hendricks/" target="_blank" rel="noreferrer">
                   LinkedIn
                 </a>
                 <a className="text-sky-300 hover:text-sky-100 underline underline-offset-4" href="https://martyhendricks.notion.site/" target="_blank" rel="noreferrer">
                   Portfolio
-                </a>
-                <a className="text-sky-300 hover:text-sky-100 underline underline-offset-4" href="https://drive.google.com/file/d/1pGtQoBwVnPPCO1DFlzkVWjYvUAAz_Omr/view?usp=sharing" target="_blank" rel="noreferrer">
-                  Resume
                 </a>
               </div>
             </div>
