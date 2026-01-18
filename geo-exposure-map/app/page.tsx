@@ -5,6 +5,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { geoNaturalEarth1, geoPath } from "d3-geo";
 import type { Feature, Geometry } from "geojson";
 import Image from "next/image";
+import { buildExposureData, type ApiPayload } from "../lib/exposure-core";
 
 type GeoFeature = Feature<Geometry, Record<string, unknown>>;
 
@@ -16,15 +17,6 @@ type CountryDetail = {
   share: number;
   population: number | null;
   flagUrl: string | null;
-};
-
-type ApiPayload = {
-  iso3ToIntensity: Record<string, number>;
-  countryDetails: CountryDetail[];
-  geo: { features?: GeoFeature[] };
-  totalRevenueMillions: number;
-  maxShare?: number;
-  meta?: { note?: string };
 };
 
 const NAME_OVERRIDES: Record<string, string> = {
@@ -161,12 +153,7 @@ export default function Page() {
     async function load() {
       setError(null);
       try {
-        const res = await fetch("/api/exposure");
-        const j = (await res.json()) as ApiPayload;
-        if (!res.ok) {
-          setError((j as { error?: string })?.error || "Failed to load data");
-          return;
-        }
+        const j = await buildExposureData();
         const normIntensity: Record<string, number> = {};
         for (const [k, v] of Object.entries(j.iso3ToIntensity || {})) {
           normIntensity[k.toUpperCase()] = v;
@@ -189,7 +176,8 @@ export default function Page() {
         }
         setNames(nameMap);
         setMetaNote(j.meta?.note || "");
-      } catch {
+      } catch (e) {
+        console.error(e);
         setError("Failed to load data");
       }
     }

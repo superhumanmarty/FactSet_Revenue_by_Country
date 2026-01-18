@@ -1,14 +1,27 @@
-import { NextResponse } from "next/server";
-import { buildExposureData } from "../../../lib/exposure-core";
-
-// Static export requires route handlers to be static; precompute once per build.
-export const dynamic = "force-static";
-export const revalidate = 86_400; // revalidate daily
-
-export async function GET() {
-  const data = await buildExposureData();
-  return NextResponse.json(data);
-}
+export type ApiPayload = {
+  iso3ToIntensity: Record<string, number>;
+  countryDetails: Array<{
+    iso3: string;
+    name: string;
+    region: string;
+    revenueMillions: number;
+    share: number;
+    population: number | null;
+    flagUrl: string | null;
+    segment: string;
+    office: boolean;
+    hub: boolean;
+    nearZero: boolean;
+  }>;
+  geo: {
+    features?: Array<{
+      properties?: Record<string, unknown>;
+    }>;
+  };
+  totalRevenueMillions: number;
+  maxShare: number;
+  meta: { note: string };
+};
 
 // FY2025 segment revenues from FactSet 10-K (USD millions)
 const SEGMENT_REVENUE_USD_M: Record<string, number> = {
@@ -76,25 +89,10 @@ const OFFICE_MULT = 1.15;
 const NEAR_ZERO = new Set(["CUB", "IRN", "PRK", "RUS"]);
 const NEAR_ZERO_MULT = 0.01;
 
-type GeoJson = {
-  features?: Array<{
-    properties?: Record<string, unknown>;
-  }>;
-};
-
 type WorldBankDatum = {
   countryiso3code?: string;
   value?: number | null;
   date?: string | number;
-};
-
-type Country = {
-  iso3: string;
-  alpha2: string | null;
-  name: string;
-  region: string | null;
-  subRegion: string | null;
-  seg: "AMERICAS" | "EMEA" | "APAC" | null;
 };
 
 function splitCsvLine(line: string): string[] {
@@ -154,17 +152,24 @@ function clamp(x: number, lo: number, hi: number) {
   return Math.max(lo, Math.min(hi, x));
 }
 
-export async function GET() {
+export async function buildExposureData(): Promise<ApiPayload> {
   // 1) ISO list
   const isoRes = await fetch(ISO_CSV_URL, { cache: "force-cache" });
-  if (!isoRes.ok) return NextResponse.json({ error: "iso fetch failed" }, { status: 502 });
+  if (!isoRes.ok) throw new Error("iso fetch failed");
   const isoCsv = await isoRes.text();
   const lines = isoCsv.trim().split("\n");
   const header = splitCsvLine(lines[0]);
   const idx = (name: string) => header.indexOf(name);
 
   const iso3ToAlpha2: Record<string, string> = {};
-  const countries: Country[] = [];
+  const countries: Array<{
+    iso3: string;
+    alpha2: string | null;
+    name: string;
+    region: string | null;
+    subRegion: string | null;
+    seg: "AMERICAS" | "EMEA" | "APAC" | null;
+  }> = [];
   for (let i = 1; i < lines.length; i++) {
     const cols = splitCsvLine(lines[i]);
     const iso3 = cols[idx("alpha-3")]?.trim().toUpperCase();
@@ -361,22 +366,15 @@ export async function GET() {
     };
   }
 
-  const countryDetails = Object.values(countryDetailsMap);
-
-  // GeoJSON passthrough for client
-  const geoRes = await fetch(COUNTRIES_GEOJSON, { cache: "force-cache" });
-  if (!geoRes.ok) return NextResponse.json({ error: "geo fetch failed" }, { status: 502 });
-  const geo = (await geoRes.json()) as GeoJson;
-
-  return NextResponse.json({
+  return {
     iso3ToIntensity,
-    countryDetails,
-    geo,
+    countryDetails: Object.values(countryDetailsMap),
+    geo: await fetch(COUNTRIES_GEOJSON, { cache: "force-cache" }).then((r) => r.json()),
     totalRevenueMillions,
     maxShare,
     meta: {
       note:
         "FactSet FY2025 estimated per-country revenue. Anchors: reported segment totals (Americas, EMEA, APAC). Allocation: GDP, market depth, credit, GDP per capita, internet penetration; explicit multipliers for hubs and disclosed office countries; comprehensive-sanctions set near-zero. Outputs USD millions and flags for office/hub/near-zero.",
     },
-  });
+  };
 }
