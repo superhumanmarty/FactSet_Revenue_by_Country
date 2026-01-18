@@ -351,7 +351,7 @@ export default function Page() {
                 border: `1px solid ${BORDER}`,
                 minHeight: 220,
                 maxHeight: 220,
-                overflow: "hidden",
+                overflowY: "auto",
               }}
             >
               <div className="flex items-center gap-2 text-sky-100">
