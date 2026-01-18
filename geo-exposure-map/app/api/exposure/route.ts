@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 
+// Static export requires route handlers to be static; precompute once per build.
+export const dynamic = "force-static";
+export const revalidate = 86_400; // revalidate daily
+
 // FY2025 segment revenues from FactSet 10-K (USD millions)
 const SEGMENT_REVENUE_USD_M: Record<string, number> = {
   AMERICAS: 1_506_108 / 1_000,
