@@ -49,6 +49,9 @@ const NAME_TO_ISO_OVERRIDES: Record<string, string> = {
 const BG = "#05090d";
 const PANEL = "#0b1118";
 const BORDER = "#16202b";
+const BASE = "/FactSet_Revenue_by_Country";
+const HEADSHOT_SRC = `${BASE}/headshot.jpg`;
+const LOGO_SRC = `${BASE}/factset_logo.png`;
 
 function clamp01(x: number) {
   return Math.max(0, Math.min(1, x));
@@ -240,7 +243,7 @@ export default function Page() {
       <div className="mx-auto w-full max-w-6xl px-4 py-8">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
-            <Image src="/factset_logo.png" alt="FactSet" width={120} height={28} priority />
+            <Image src={LOGO_SRC} alt="FactSet" width={120} height={28} priority />
             <div className="text-lg font-semibold text-white">Revenue by Country</div>
             <div className="relative group inline-flex items-center text-xs text-sky-200/80">
               <span className="flex h-5 w-5 items-center justify-center rounded-full bg-sky-900/60 text-[10px] font-semibold text-sky-100">
@@ -268,7 +271,7 @@ export default function Page() {
               </div>
             </div>
             <div className="h-12 w-12 overflow-hidden rounded-full ring-1 ring-[#1f2b38]">
-              <Image src="/headshot.jpg" alt="Marty Hendricks headshot" width={48} height={48} className="h-full w-full object-cover" />
+              <Image src={HEADSHOT_SRC} alt="Marty Hendricks headshot" width={48} height={48} className="h-full w-full object-cover" />
             </div>
           </div>
         </div>
