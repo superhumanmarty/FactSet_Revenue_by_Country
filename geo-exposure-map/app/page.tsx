@@ -404,8 +404,7 @@ export default function Page() {
                     Population: {fmtPopulation(hoverDetail.population)}
                   </div>
                   <div className="text-sky-200/70">
-                    GDP (current US$): {fmtCurrency(hoverDetail.gdpCurrentUsd)}
-                    {hoverDetail.gdpYear ? ` · ${hoverDetail.gdpYear}` : ""}
+                    GDP: ${fmtCurrency(hoverDetail.gdpCurrentUsd)}
                   </div>
                 </div>
               ) : (
